@@ -443,11 +443,11 @@ body.fullscreen .side-panel{display:none}
 <div class="settings-panel" id="settingsPanel">
   <h3>⚙ Settings</h3>
   <label>Server URL</label>
-  <input type="text" id="serverUrl" value="http://192.168.55.43:8642" placeholder="http://&lt;server-ip&gt;:8642">
+  <input type="text" id="serverUrl" value="http://192.168.55.43:3001" placeholder="http://&lt;server-ip&gt;:3001">
   <label>Metrics URL</label>
-  <input type="text" id="metricsUrl" value="http://192.168.55.43:8643/system" placeholder="http://&lt;server-ip&gt;:8643/system">
+  <input type="text" id="metricsUrl" value="http://192.168.55.43:3001/metrics" placeholder="http://&lt;server-ip&gt;:3001/metrics">
   <label>API Endpoint</label>
-  <input type="text" id="apiEndpoint" value="http://192.168.55.43:8642/v1/chat/completions">
+  <input type="text" id="apiEndpoint" value="http://192.168.55.43:3001/v1/chat/completions">
   <label>API Key</label>
   <div class="api-key" id="apiKeyDisplay">••••••••</div>
   <label>Model</label>
@@ -520,12 +520,12 @@ let isSpeaking=false,alwaysListening=false,autoFs=false,ttsEnabled=true;
 let messages=[{role:"system",content:"You are J.A.R.V.I.S., Tony Stark's AI assistant. Respond with calm, British-tinged professionalism. Be helpful, witty when appropriate, but always precise. Keep responses concise and conversational."}];
 
 // Settings
-const API_KEY='0b0765631d437f1806e1046fe437f2ae41363904cc6ee161cfaae3c7b640e77d';
+const API_KEY='freellmapi-475bfc0f36bd5559f17fee9a2f92a33d52ab404869205e2f';
 const SETTINGS_KEY='jarvis_settings';
 
 function getBaseUrl(){
   const u=document.getElementById('serverUrl').value.replace(/\/+$/,'');
-  return u||'http://127.0.0.1:8642';
+  return u||'http://192.168.55.43:3001';
 }
 function updateApiEndpointFromServer(){
   const base=getBaseUrl();
@@ -537,8 +537,8 @@ function loadSettings(){
   try{
     const s=JSON.parse(localStorage.getItem(SETTINGS_KEY));
     if(s){
-      document.getElementById('serverUrl').value=s.serverUrl||'http://192.168.55.43:8642';
-      document.getElementById('metricsUrl').value=s.metricsUrl||'http://192.168.55.43:8643/system';
+      document.getElementById('serverUrl').value=s.serverUrl||'http://192.168.55.43:3001';
+      document.getElementById('metricsUrl').value=s.metricsUrl||'http://192.168.55.43:3001/metrics';
       updateApiEndpointFromServer();
       document.getElementById('modelSelect').value=s.model||'auto';
       document.getElementById('ttsRate').value=s.ttsRate||1.05;
