@@ -2,18 +2,29 @@
 
 A sleek, single-page chat interface for an OpenAI-compatible AI backend. Inspired by the Arc Reactor / HUD aesthetic.
 
-## Features
+## ✨ Features
 
 - **Streaming responses** — tokens appear in real-time as the model generates them
 - **Markdown rendering** — code blocks, lists, headers, links, blockquotes
 - **Text-to-speech (TTS)** — browser-native speech synthesis, optional auto-speak
 - **Voice input** — Web Speech API microphone recording
-- **File drop** — drag text files into the drop zone
+- **File drop** — drag-and-drop or click to upload files with preview
 - **Fullscreen mode** — hides chrome, full immersion
 - **Persistent chat** — messages saved to `localStorage`
+- **HUD background** — animated canvas with particles and rotating rings
+- **System metrics** — real-time CPU, memory, network monitoring
 - **Settings panel** — Server URL, API endpoint, metrics URL, model, TTS voice/rate/pitch, toggles
 - **System status panel** — connection health, server latency, system metrics
 - **Clear chat** — reset conversation and local storage
+
+## 🎨 Visual Enhancements
+
+- **Animated HUD background** — canvas-based particles and rotating rings
+- **Reactive status indicators** — color-coded and animated based on state
+- **System metrics dashboard** — live CPU, RAM, network usage bars
+- **Enhanced file drop zone** — drag-and-drop with file type icons and preview
+- **Rotating HUD rings** — CSS-animated concentric rings in background
+- **Flickering data points** — decorative HUD text elements
 
 ## Requirements
 

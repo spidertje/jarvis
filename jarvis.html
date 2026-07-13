@@ -178,6 +178,197 @@ body.fullscreen .fs-toggle{display:flex}
     rgba(6,182,212,.015) 25%,
     transparent 55%);
 }
+
+/* HUD canvas background */
+.hud-canvas{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:0;
+}
+
+/* HUD rotating rings */
+.hud-ring{
+  position:fixed;top:50%;left:50%;
+  border-radius:50%;
+  border:1px solid rgba(6,182,212,.08);
+  pointer-events:none;z-index:0;
+}
+.hud-ring:nth-child(1){
+  width:30vmin;height:30vmin;margin:-15vmin 0 0 -15vmin;
+  border-color:rgba(6,182,212,.12);
+  animation:hud-spin 20s linear infinite;
+}
+.hud-ring:nth-child(2){
+  width:50vmin;height:50vmin;margin:-25vmin 0 0 -25vmin;
+  border-color:rgba(6,182,212,.06);
+  animation:hud-spin 30s linear infinite reverse;
+}
+.hud-ring:nth-child(3){
+  width:70vmin;height:70vmin;margin:-35vmin 0 0 -35vmin;
+  border-color:rgba(6,182,212,.04);
+  animation:hud-spin 40s linear infinite;
+}
+@keyframes hud-spin{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+
+/* HUD data points */
+.hud-data{
+  position:fixed;
+  font-family:monospace;
+  font-size:10px;
+  color:rgba(6,182,212,.3);
+  pointer-events:none;
+  z-index:0;
+  animation:hud-flicker 3s ease-in-out infinite;
+}
+.hud-data:nth-child(4){top:20%;left:15%;animation-delay:0s}
+.hud-data:nth-child(5){top:60%;left:10%;animation-delay:.5s}
+.hud-data:nth-child(6){top:30%;right:15%;animation-delay:1s}
+.hud-data:nth-child(7){top:70%;right:10%;animation-delay:1.5s}
+@keyframes hud-flicker{
+  0%,100%{opacity:.3}
+  50%{opacity:.8}
+}
+
+/* system metrics dashboard */
+.metrics-dashboard{
+  position:fixed;top:70px;right:20px;
+  background:rgba(3,7,18,.85);
+  backdrop-filter:blur(12px);
+  border:1px solid rgba(6,182,212,.15);
+  border-radius:12px;
+  padding:16px;
+  z-index:50;
+  min-width:200px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s,transform .3s;
+  transform:translateY(-10px);
+}
+.metrics-dashboard.visible{
+  opacity:1;
+  pointer-events:auto;
+  transform:translateY(0);
+}
+.metrics-title{
+  font-size:11px;
+  color:#5b8ba0;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.metrics-title::before{
+  content:'';
+  width:8px;height:8px;
+  border-radius:50%;
+  background:#06b6d4;
+  animation:metrics-pulse 2s ease-in-out infinite;
+}
+@keyframes metrics-pulse{
+  0%,100%{opacity:.5}
+  50%{opacity:1}
+}
+.metric-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid rgba(6,182,212,.06);
+}
+.metric-item:last-child{border-bottom:none}
+.metric-label{
+  font-size:11px;
+  color:#94a3b8;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.metric-value{
+  font-size:12px;
+  font-family:monospace;
+  color:#e0f2fe;
+}
+.metric-bar{
+  width:100%;
+  height:4px;
+  background:rgba(6,182,212,.1);
+  border-radius:2px;
+  margin-top:4px;
+  overflow:hidden;
+}
+.metric-bar-fill{
+  height:100%;
+  border-radius:2px;
+  transition:width .5s ease;
+}
+.metric-bar-fill.cpu{background:linear-gradient(90deg,#06b6d4,#0891b2)}
+.metric-bar-fill.memory{background:linear-gradient(90deg,#8b5cf6,#7c3aed)}
+.metric-bar-fill.network{background:linear-gradient(90deg,#22c55e,#16a34a)}
+.metric-bar-fill.gpu{background:linear-gradient(90deg,#f59e0b,#d97706)}
+
+/* enhanced file drop zone */
+.file-drop-zone{
+  position:relative;
+  overflow:hidden;
+}
+.file-drop-zone::before{
+  content:'📁';
+  position:absolute;
+  left:16px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:16px;
+  opacity:.5;
+}
+.file-drop-zone.dragover::before{
+  opacity:1;
+  animation:file-bounce 1s ease-in-out infinite;
+}
+@keyframes file-bounce{
+  0%,100%{transform:translateY(-50%) scale(1)}
+  50%{transform:translateY(-50%) scale(1.2)}
+}
+.file-preview{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 12px;
+  background:rgba(6,182,212,.08);
+  border-radius:8px;
+  margin-top:8px;
+  font-size:12px;
+  color:#67e8f9;
+}
+.file-preview-icon{
+  font-size:20px;
+}
+.file-preview-name{
+  flex:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.file-preview-size{
+  color:#5b8ba0;
+  font-family:monospace;
+}
+.file-preview-remove{
+  background:none;
+  border:none;
+  color:#ef4444;
+  cursor:pointer;
+  font-size:16px;
+  padding:4px;
+  border-radius:4px;
+  transition:background .2s;
+}
+.file-preview-remove:hover{
+  background:rgba(239,68,68,.1);
+}
 .ring-pulse{
   position:fixed;top:50%;left:50%;translate:-50% -50%;
   width:60vmin;height:60vmin;border-radius:50%;
@@ -251,7 +442,41 @@ body.fullscreen .fs-toggle{display:flex}
 </style>
 </head>
 <body>
-<div class="hud-container"><canvas id="hudCanvas" width="800" height="800" style="position:fixed;top:50%;left:50%;translate:-50% -50%;pointer-events:none;z-index:-1;"></canvas></div>
+<!-- HUD Background -->
+<canvas id="hudCanvas" class="hud-canvas"></canvas>
+<div class="hud-ring"></div>
+<div class="hud-ring"></div>
+<div class="hud-ring"></div>
+<div class="hud-data">SYS:0x4A2F</div>
+<div class="hud-data">NET:ACTIVE</div>
+<div class="hud-data">MEM:OK</div>
+<div class="hud-data">UPLINK:STABLE</div>
+
+<!-- System Metrics Dashboard -->
+<div class="metrics-dashboard" id="metricsDashboard">
+  <div class="metrics-title">System Metrics</div>
+  <div class="metric-item">
+    <div>
+      <div class="metric-label">🔵 CPU</div>
+      <div class="metric-bar"><div class="metric-bar-fill cpu" id="cpuBar" style="width:0%"></div></div>
+    </div>
+    <div class="metric-value" id="cpuValue">0%</div>
+  </div>
+  <div class="metric-item">
+    <div>
+      <div class="metric-label">🟣 Memory</div>
+      <div class="metric-bar"><div class="metric-bar-fill memory" id="memBar" style="width:0%"></div></div>
+    </div>
+    <div class="metric-value" id="memValue">0%</div>
+  </div>
+  <div class="metric-item">
+    <div>
+      <div class="metric-label">🟢 Network</div>
+      <div class="metric-bar"><div class="metric-bar-fill network" id="netBar" style="width:0%"></div></div>
+    </div>
+    <div class="metric-value" id="netValue">0 MB/s</div>
+  </div>
+</div>
 
 <div class="center-ring" id="centerRing"></div>
 <div class="ring-pulse" style="animation-delay:0s"></div>
@@ -403,7 +628,128 @@ function saveSettings(){
   }));
 }
 
-// ── DOM ──
+// ── HUD Canvas Animation ──
+const hudCanvas = document.getElementById('hudCanvas');
+const hudCtx = hudCanvas.getContext('2d');
+let hudAngle = 0;
+let hudParticles = [];
+
+function resizeHudCanvas(){
+  hudCanvas.width = window.innerWidth;
+  hudCanvas.height = window.innerHeight;
+}
+resizeHudCanvas();
+window.addEventListener('resize', resizeHudCanvas);
+
+// Create particles
+for(let i=0;i<50;i++){
+  hudParticles.push({
+    x: Math.random() * hudCanvas.width,
+    y: Math.random() * hudCanvas.height,
+    size: Math.random() * 2 + 0.5,
+    speedX: (Math.random() - 0.5) * 0.5,
+    speedY: (Math.random() - 0.5) * 0.5,
+    opacity: Math.random() * 0.5 + 0.2
+  });
+}
+
+function drawHud(){
+  hudCtx.clearRect(0, 0, hudCanvas.width, hudCanvas.height);
+  
+  // Draw rotating rings
+  hudCtx.strokeStyle = 'rgba(6, 182, 212, 0.1)';
+  hudCtx.lineWidth = 1;
+  
+  for(let i=0;i<3;i++){
+    hudCtx.beginPath();
+    hudCtx.arc(hudCanvas.width/2, hudCanvas.height/2, 100 + i*80, hudAngle + i*0.5, hudAngle + i*0.5 + Math.PI*1.5);
+    hudCtx.stroke();
+  }
+  
+  // Draw particles
+  hudParticles.forEach(p => {
+    p.x += p.speedX;
+    p.y += p.speedY;
+    
+    if(p.x < 0) p.x = hudCanvas.width;
+    if(p.x > hudCanvas.width) p.x = 0;
+    if(p.y < 0) p.y = hudCanvas.height;
+    if(p.y > hudCanvas.height) p.y = 0;
+    
+    hudCtx.fillStyle = `rgba(6, 182, 212, ${p.opacity})`;
+    hudCtx.beginPath();
+    hudCtx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+    hudCtx.fill();
+  });
+  
+  // Draw connections
+  hudCtx.strokeStyle = 'rgba(6, 182, 212, 0.05)';
+  hudCtx.lineWidth = 0.5;
+  for(let i=0;i<hudParticles.length;i++){
+    for(let j=i+1;j<hudParticles.length;j++){
+      const dx = hudParticles[i].x - hudParticles[j].x;
+      const dy = hudParticles[i].y - hudParticles[j].y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      if(dist < 100){
+        hudCtx.beginPath();
+        hudCtx.moveTo(hudParticles[i].x, hudParticles[i].y);
+        hudCtx.lineTo(hudParticles[j].x, hudParticles[j].y);
+        hudCtx.stroke();
+      }
+    }
+  }
+  
+  hudAngle += 0.002;
+  requestAnimationFrame(drawHud);
+}
+drawHud();
+
+// ── System Metrics ──
+let metricsInterval = null;
+let metricsVisible = false;
+
+function toggleMetrics(){
+  const dash = document.getElementById('metricsDashboard');
+  metricsVisible = !metricsVisible;
+  if(metricsVisible){
+    dash.classList.add('visible');
+    fetchMetrics();
+    metricsInterval = setInterval(fetchMetrics, 2000);
+  } else {
+    dash.classList.remove('visible');
+    clearInterval(metricsInterval);
+  }
+}
+
+async function fetchMetrics(){
+  try{
+    const res = await fetch('http://127.0.0.1:8642/metrics');
+    if(res.ok){
+      const data = await res.json();
+      updateMetricsDisplay(data);
+    }
+  } catch(e){
+    // Metrics endpoint not available
+  }
+}
+
+function updateMetricsDisplay(data){
+  if(data.cpu){
+    document.getElementById('cpuBar').style.width = data.cpu + '%';
+    document.getElementById('cpuValue').textContent = data.cpu + '%';
+  }
+  if(data.memory){
+    document.getElementById('memBar').style.width = data.memory + '%';
+    document.getElementById('memValue').textContent = data.memory + '%';
+  }
+  if(data.network){
+    document.getElementById('netBar').style.width = Math.min(data.network, 100) + '%';
+    document.getElementById('netValue').textContent = data.network + ' MB/s';
+  }
+}
+
+// Toggle metrics with stats button (reuse existing button)
+document.getElementById('statsBtn').addEventListener('click', toggleMetrics);
 const chat=document.getElementById('chatArea');
 const input=document.getElementById('input');
 const sendBtn=document.getElementById('sendBtn');
@@ -921,18 +1267,64 @@ clearBtn.addEventListener('click',()=>{
   preventDefaults.forEach(e=>zone.addEventListener(e,e=>e.preventDefault()));
   zone.addEventListener('dragenter',()=>zone.classList.add('dragover'));
   zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+  
+  let currentFile = null;
+  
   zone.addEventListener('drop',e=>{
     zone.classList.remove('dragover');
     const files=e.dataTransfer.files;
     if(!files.length)return;
-    const file=files[0];
-    const reader=new FileReader();
-    reader.onload=()=>{
-      addMsg('user',`[File: ${file.name}](${reader.result?.substring(0,100)||''})`);
-      scrollChat();
-    };
-    reader.readAsText(file);
+    currentFile = files[0];
+    showFilePreview(currentFile);
   });
+  
+  zone.addEventListener('click',()=>{
+    if(currentFile){
+      currentFile = null;
+      zone.innerHTML = 'Drop file here';
+      const existingPreview = zone.querySelector('.file-preview');
+      if(existingPreview) existingPreview.remove();
+    } else {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '*/*';
+      input.onchange = (e) => {
+        if(e.target.files.length){
+          currentFile = e.target.files[0];
+          showFilePreview(currentFile);
+        }
+      };
+      input.click();
+    }
+  });
+  
+  function showFilePreview(file){
+    const ext = file.name.split('.').pop().toLowerCase();
+    let icon = '📄';
+    if(['jpg','jpeg','png','gif','webp','svg'].includes(ext)) icon = '🖼️';
+    else if(['pdf'].includes(ext)) icon = '📕';
+    else if(['mp3','wav','ogg','m4a'].includes(ext)) icon = '🎵';
+    else if(['mp4','avi','mov','mkv'].includes(ext)) icon = '🎬';
+    else if(['py','js','ts','html','css','json','yaml','yml'].includes(ext)) icon = '💻';
+    
+    const size = formatFileSize(file.size);
+    zone.innerHTML = `
+      <div style="text-align:center;color:#94a3b8;font-size:14px;">
+        <div style="font-size:24px;margin-bottom:8px;">${icon}</div>
+        <div style="font-weight:500;color:#67e8f9;">${file.name}</div>
+        <div style="font-size:12px;margin-top:4px;">${size}</div>
+        <button class="file-preview-remove" style="margin-top:8px;background:none;border:1px solid rgba(239,68,68,.3);color:#ef4444;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:12px;">Remove</button>
+      </div>
+    `;
+  }
+  
+  function formatFileSize(bytes){
+    if(bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  }
 })();
 
 // ── init ──
