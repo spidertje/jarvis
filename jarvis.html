@@ -279,8 +279,14 @@ body.fullscreen .fs-toggle{display:flex}
 <div class="settings-panel" id="settingsPanel">
   <h3>⚙ Settings</h3>
 
+  <label>Server URL</label>
+    <input type="text" id="serverUrl" value="http://192.168.55.43:8642" placeholder="http://<server-ip>:8642">
+
+  <label>Metrics URL</label>
+    <input type="text" id="metricsUrl" value="http://192.168.55.43:8643/system" placeholder="http://<server-ip>:8643/system">
+
   <label>API Endpoint</label>
-    <input type="text" id="apiEndpoint" value="http://127.0.0.1:8642/v1/chat/completions">
+    <input type="text" id="apiEndpoint" value="http://192.168.55.43:8642/v1/chat/completions">
 
   <label>API Key</label>
   <div class="api-key" id="apiKeyDisplay">••••••••</div>
@@ -353,11 +359,23 @@ let messages=[{role:"system",content:"You are J.A.R.V.I.S., Tony Stark's AI assi
 const API_KEY='0b0765631d437f1806e1046fe437f2ae41363904cc6ee161cfaae3c7b640e77d';
 const SETTINGS_KEY='jarvis_settings';
 
+function getBaseUrl(){
+  const u=document.getElementById('serverUrl').value.replace(/\/+$/,'');
+  return u||'http://127.0.0.1:8642';
+}
+function updateApiEndpointFromServer(){
+  const base=getBaseUrl();
+  document.getElementById('apiEndpoint').value=base+'/v1/chat/completions';
+}
+document.getElementById('serverUrl').addEventListener('input',updateApiEndpointFromServer);
+
 function loadSettings(){
   try{
     const s=JSON.parse(localStorage.getItem(SETTINGS_KEY));
     if(s){
-      document.getElementById('apiEndpoint').value=s.endpoint||'http://127.0.0.1:8642/v1/chat/completions';
+      document.getElementById('serverUrl').value=s.serverUrl||'http://192.168.55.43:8642';
+      document.getElementById('metricsUrl').value=s.metricsUrl||'http://192.168.55.43:8643/system';
+      updateApiEndpointFromServer();
       document.getElementById('modelSelect').value=s.model||'auto';
       document.getElementById('ttsRate').value=s.ttsRate||1.05;
       document.getElementById('ttsPitch').value=s.ttsPitch||0.9;
@@ -375,6 +393,8 @@ function loadSettings(){
 }
 function saveSettings(){
   localStorage.setItem(SETTINGS_KEY,JSON.stringify({
+    serverUrl:document.getElementById('serverUrl').value,
+    metricsUrl:document.getElementById('metricsUrl').value,
     endpoint:document.getElementById('apiEndpoint').value,
     model:document.getElementById('modelSelect').value,
     ttsRate:parseFloat(document.getElementById('ttsRate').value),
@@ -815,9 +835,10 @@ function loadMessages(){
 // ── stats panel ──
 let statsInterval=null;
 async function fetchStats(){
+  const base=getBaseUrl();
   const start=performance.now();
   try{
-    const res=await fetch('http://127.0.0.1:8642/health');
+    const res=await fetch(base+'/health');
     const lat=Math.round(performance.now()-start);
     const data=await res.json();
     return{version:data.version||'?',latency:lat+'ms',cores:navigator.hardwareConcurrency||'?',
@@ -846,10 +867,11 @@ function renderStats(s){
 }
 
 async function updateStats() {
+  const base=getBaseUrl();
   const connStart = performance.now();
   let connLatency = '???', connVersion = 'offline', connCores = navigator.hardwareConcurrency || '?';
   try {
-    const connRes = await fetch('http://127.0.0.1:8642/health');
+    const connRes = await fetch(base+'/health');
     connLatency = Math.round(performance.now() - connStart) + 'ms';
     const connData = await connRes.json();
     connVersion = connData.version || '?';
@@ -857,8 +879,11 @@ async function updateStats() {
   
   let metrics = null;
   try {
-    const metricsRes = await fetch('http://127.0.0.1:8643/system');
-    metrics = await metricsRes.json();
+    const mUrl=document.getElementById('metricsUrl').value;
+    if(mUrl){
+      const metricsRes = await fetch(mUrl);
+      metrics = await metricsRes.json();
+    }
   } catch(e) {}
   
   renderStats({
