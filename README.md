@@ -13,6 +13,8 @@ A sleek, single-page chat interface for an OpenAI-compatible AI backend. Inspire
 - **Persistent chat** — messages saved to `localStorage`
 - **HUD background** — animated canvas with particles and rotating rings
 - **System metrics** — real-time CPU, memory, network monitoring
+- **Side panel** — quick actions and recent files
+- **Tool buttons** — web search, weather, code, files, translate
 - **Settings panel** — Server URL, API endpoint, metrics URL, model, TTS voice/rate/pitch, toggles
 - **System status panel** — connection health, server latency, system metrics
 - **Clear chat** — reset conversation and local storage
@@ -25,6 +27,24 @@ A sleek, single-page chat interface for an OpenAI-compatible AI backend. Inspire
 - **Enhanced file drop zone** — drag-and-drop with file type icons and preview
 - **Rotating HUD rings** — CSS-animated concentric rings in background
 - **Flickering data points** — decorative HUD text elements
+- **Side panel** — quick actions and recent files (toggleable)
+- **Tool buttons** — web search, weather, code, files, translate, search
+
+## 📁 Files
+
+| File | Purpose |
+|------|---------|
+| `jarvis.html` | Single-file application (HTML + CSS + JS) |
+| `README.md` | This manual |
+| `UI_FEATURES.md` | Feature ideas list (saved for later) |
+| `UI_UPGRADE_PLAN.md` | Upgrade plan (saved for reference) |
+
+## 🚀 Next Steps
+
+- **Phase 3**: Enhanced file processing (images, PDFs, audio, video)
+- **Phase 4**: Three-panel layout (collapsible side panels)
+- **Phase 5**: Theme controls (transparency, accent colors, multiple themes)
+- **Phase 6**: Session management (save/load/export conversations)
 
 ## Requirements
 
