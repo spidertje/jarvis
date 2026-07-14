@@ -518,6 +518,7 @@ let state=STATE.IDLE,isRecording=false,synth=window.speechSynthesis,recognition=
 let isSpeaking=false,alwaysListening=false,autoFs=false,ttsEnabled=true;
 
 let messages=[{role:"system",content:"You are J.A.R.V.I.S., Tony Stark's AI assistant. Respond with calm, British-tinged professionalism. Be helpful, witty when appropriate, but always precise. Keep responses concise and conversational."}];
+let hudActivityLevel=0; // 0=idle, 1=thinking, 2=speaking
 
 // Settings
 const API_KEY='freellmapi-475bfc0f36bd5559f17fee9a2f92a33d52ab404869205e2f';
@@ -751,7 +752,6 @@ input.addEventListener('input',()=>{input.style.height='auto';input.style.height
 input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
 
 // ── Status ──
-let hudActivityLevel=0; // 0=idle, 1=thinking, 2=speaking
 function setStatus(s){
   state=s;
   let {symbol, color} = getStatusSymbol(s, true);
