@@ -65,6 +65,8 @@ body::after{
   animation:pulse-reactor 2s ease-in-out infinite}
 @keyframes pulse-reactor{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.15);opacity:1}}
 body.active .arc-reactor::after{animation:pulse-reactor 0.8s ease-in-out infinite}
+.arc-reactor.flash{animation:reactor-flash 0.15s ease-out}
+@keyframes reactor-flash{0%{box-shadow:0 0 20px rgba(6,182,212,.3),inset 0 0 15px rgba(6,182,212,.1)}50%{box-shadow:0 0 40px rgba(103,232,249,.6),inset 0 0 25px rgba(103,232,249,.4)}100%{box-shadow:0 0 20px rgba(6,182,212,.3),inset 0 0 15px rgba(6,182,212,.1)}}
 .top-bar .title{font-size:18px;font-weight:600;letter-spacing:2px;
   background:linear-gradient(135deg,#67e8f9,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .top-bar .subtitle{font-size:11px;color:#5b8ba0;letter-spacing:3px;text-transform:uppercase}
@@ -246,6 +248,8 @@ body.active .arc-reactor::after{animation:pulse-reactor 0.8s ease-in-out infinit
 }
 .viz-container.active{opacity:1;}
 .viz-bar{width:4px;border-radius:2px;background:#06b6d4;transition:height .08s ease}
+.viz-bar.pulse{animation:bar-pulse 0.2s ease-out}
+@keyframes bar-pulse{0%{height:2px}50%{height:var(--pulse-height, 40px);box-shadow:0 0 8px rgba(103,232,249,.3)}100%{height:2px}}
 
 /* Wave Ring */
 .wave-ring{
@@ -258,6 +262,8 @@ body.active .arc-reactor::after{animation:pulse-reactor 0.8s ease-in-out infinit
 .wave-ring .ring:nth-child(2){animation-delay:.5s}
 .wave-ring .ring:nth-child(3){animation-delay:1s}
 @keyframes wave-expand{0%{transform:scale(.9);opacity:.6}100%{transform:scale(1.4);opacity:0}}
+.wave-ring .ring.flash{animation:wave-flash 0.4s ease-out forwards}
+@keyframes wave-flash{0%{transform:scale(.7);opacity:.8;border-color:rgba(103,232,249,.4)}100%{transform:scale(1.8);opacity:0;border-color:rgba(103,232,249,.0)}}
 
 /* Clear Button */
 .clear-btn{
@@ -951,10 +957,45 @@ function speak(text,cb){
   }
   let started=false;
   u.onstart=()=>{started=true;isSpeaking=true;setStatus(STATE.SPEAKING);console.log('Speech started');};
+  // Pulse visual on each word boundary
+  u.onboundary=(event)=>{
+    if(event.name==='word') triggerSpeechPulse();
+  };
   u.onend=()=>{isSpeaking=false;setStatus(STATE.IDLE);console.log('Speech ended');if(cb)cb();};
   u.onerror=(e)=>{isSpeaking=false;setStatus(STATE.IDLE);console.error('Speech synthesis error:', e);if(cb)cb();};
   synth.speak(u);
   setTimeout(()=>{if(!started&&state===STATE.SPEAKING)setStatus(STATE.IDLE);console.log('Speech timeout fallback');},100);
+}
+
+// ── Speech Pulse Animation ──
+function triggerSpeechPulse(){
+  // Arc reactor flash
+  const reactor=document.querySelector('.arc-reactor');
+  if(reactor){
+    reactor.classList.remove('flash');
+    void reactor.offsetWidth; // force reflow
+    reactor.classList.add('flash');
+    reactor.addEventListener('animationend',()=>reactor.classList.remove('flash'),{once:true});
+  }
+  // Wave ring ripple
+  const waveRing=document.getElementById('waveRing');
+  if(waveRing){
+    const ring=document.createElement('div');
+    ring.className='ring flash';
+    waveRing.appendChild(ring);
+    ring.addEventListener('animationend',()=>ring.remove(),{once:true});
+  }
+  // Viz bar pulse
+  if(bars){
+    bars.forEach((bar,i)=>{
+      const height=20+Math.random()*40;
+      bar.style.setProperty('--pulse-height',height+'px');
+      bar.classList.remove('pulse');
+      void bar.offsetWidth;
+      bar.classList.add('pulse');
+      bar.addEventListener('animationend',()=>bar.classList.remove('pulse'),{once:true});
+    });
+  }
 }
 
 // ── Send (Streaming) ──
