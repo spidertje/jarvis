@@ -22,7 +22,7 @@ def proxy_api(path):
     url = f'{API_BASE}/{path}'
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer *** '
+        'Authorization': f'Bearer {API_KEY}'
     }
     # Forward request
     resp = http_requests.request(

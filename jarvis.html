@@ -1049,6 +1049,10 @@ function initRecognition(){
   recognition.onerror=e=>{
     if(e.error==='no-speech'&&!alwaysListening){stopRecording();return}
     if(e.error!=='no-speech')console.error('SR:',e.error);
+    // Show user-friendly error for secure context issues
+    if(e.error==='not-allowed'||e.error==='network'){
+      showToast('Voice input requires HTTPS or localhost');
+    }
     if(alwaysListening){setTimeout(()=>{if(alwaysListening&&!isRecording)startRecording()},500)}
     else stopRecording();
   };
@@ -1110,6 +1114,8 @@ function closeSettings(){
 settingsBtn.addEventListener('click',openSettings);
 settingsOverlay.addEventListener('click',closeSettings);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSettings();});
+// Stop clicks inside the panel from bubbling to the overlay and closing it
+document.getElementById('settingsPanel').addEventListener('click',e=>e.stopPropagation());
 
 // settings event listeners
 document.getElementById('ttsToggle').addEventListener('click',function(){
@@ -1152,6 +1158,16 @@ function loadMessages(){
       messages.push(...saved);
     }
   }catch(e){}
+}
+
+function showToast(msg){
+  const t=document.createElement('div');
+  t.className='toast';
+  t.textContent=msg;
+  document.body.appendChild(t);
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},2500);
 }
 
 // ── Stats Panel ──
@@ -1305,6 +1321,7 @@ loadSettings();
 loadMessages();
 document.getElementById('apiKeyDisplay').textContent=API_KEY.slice(0,12)+'••••';
 initRecognition();
+micBtn.addEventListener('click', toggleRecording);
 if (sendBtn) {
   sendBtn.addEventListener('click', send);
 } else {
