@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>J.A.R.V.I.S.</title>
 <style>
@@ -27,16 +27,67 @@ body::after{
 .hud-ring{
   position:fixed;top:50%;left:50%;
   border-radius:50%;
-  border:1px solid rgba(6,182,212,.08);
+  border:2px solid rgba(6,182,212,.18);
   pointer-events:none;z-index:0;
 }
-.hud-ring:nth-child(1){width:30vmin;height:30vmin;margin:-15vmin 0 0 -15vmin;border-color:rgba(6,182,212,.12);animation:hud-spin 20s linear infinite}
-.hud-ring:nth-child(2){width:50vmin;height:50vmin;margin:-25vmin 0 0 -25vmin;border-color:rgba(6,182,212,.06);animation:hud-spin 30s linear infinite reverse}
-.hud-ring:nth-child(3){width:70vmin;height:70vmin;margin:-35vmin 0 0 -35vmin;border-color:rgba(6,182,212,.04);animation:hud-spin 40s linear infinite}
-.hud-ring.active:nth-child(1){border-color:rgba(6,182,212,.35);box-shadow:0 0 20px rgba(6,182,212,.15),inset 0 0 20px rgba(6,182,212,.05);animation:hud-spin 5s linear infinite}
-.hud-ring.active:nth-child(2){border-color:rgba(6,182,212,.25);box-shadow:0 0 15px rgba(6,182,212,.1),inset 0 0 15px rgba(6,182,212,.03);animation:hud-spin 8s linear infinite reverse}
-.hud-ring.active:nth-child(3){border-color:rgba(6,182,212,.2);box-shadow:0 0 12px rgba(6,182,212,.08),inset 0 0 12px rgba(6,182,212,.02);animation:hud-spin 12s linear infinite}
+/* inner — subtle */
+.hud-ring:nth-of-type(1){
+  width:30vmin;height:30vmin;margin:-15vmin 0 0 -15vmin;
+  border-color:rgba(6,182,212,.22);
+  animation:hud-spin 20s linear infinite;
+}
+/* middle — mist fill */
+.hud-ring:nth-of-type(2){
+  width:50vmin;height:50vmin;margin:-25vmin 0 0 -25vmin;
+  border-color:rgba(6,182,212,.18);
+  animation:hud-spin 30s linear infinite reverse;
+}
+.hud-ring:nth-of-type(2)::after{
+  content:'';position:absolute;inset:6px;border-radius:50%;
+  background:radial-gradient(circle,rgba(6,182,212,0) 20%,rgba(6,182,212,.14) 55%,rgba(6,182,212,0) 90%);
+  filter:blur(12px);opacity:.6;transition:opacity .3s;
+  animation:mist-pulse 3s ease-in-out infinite;
+}
+/* outer — mist fill */
+.hud-ring:nth-of-type(3){
+  width:70vmin;height:70vmin;margin:-35vmin 0 0 -35vmin;
+  border-color:rgba(6,182,212,.14);
+  animation:hud-spin 40s linear infinite;
+}
+.hud-ring:nth-of-type(3)::after{
+  content:'';position:absolute;inset:10px;border-radius:50%;
+  background:radial-gradient(circle,rgba(6,182,212,0) 25%,rgba(6,182,212,.11) 60%,rgba(6,182,212,0) 95%);
+  filter:blur(18px);opacity:.5;transition:opacity .3s;
+  animation:mist-pulse 4s ease-in-out infinite reverse;
+}
+/* active states — bright borders + intense mist */
+.hud-ring.active:nth-of-type(1){
+  border-color:rgba(6,182,212,.6);
+  box-shadow:0 0 30px rgba(6,182,212,.25),inset 0 0 30px rgba(6,182,212,.1);
+  animation:hud-spin 5s linear infinite;
+}
+.hud-ring.active:nth-of-type(2){
+  border-color:rgba(6,182,212,.55);
+  box-shadow:0 0 40px rgba(6,182,212,.35),inset 0 0 40px rgba(6,182,212,.16);
+  animation:hud-spin 8s linear infinite reverse;
+}
+.hud-ring.active:nth-of-type(2)::after{
+  opacity:1;
+  background:radial-gradient(circle,rgba(6,182,212,0) 15%,rgba(6,182,212,.4) 55%,rgba(6,182,212,0) 90%);
+  filter:blur(14px);animation-duration:1.2s;
+}
+.hud-ring.active:nth-of-type(3){
+  border-color:rgba(6,182,212,.5);
+  box-shadow:0 0 35px rgba(6,182,212,.3),inset 0 0 35px rgba(6,182,212,.14);
+  animation:hud-spin 12s linear infinite;
+}
+.hud-ring.active:nth-of-type(3)::after{
+  opacity:.95;
+  background:radial-gradient(circle,rgba(6,182,212,0) 20%,rgba(6,182,212,.32) 60%,rgba(6,182,212,0) 95%);
+  filter:blur(22px);animation-duration:1.6s;
+}
 @keyframes hud-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes mist-pulse{0%,100%{opacity:.3;transform:scale(0.96)}50%{opacity:.8;transform:scale(1.04)}}
 @keyframes hud-pulse{0%,100%{opacity:.4}50%{opacity:1}}
 .hud-data{
   position:fixed;font-family:monospace;font-size:10px;color:rgba(6,182,212,.3);
@@ -471,11 +522,11 @@ body.fullscreen .side-panel{display:none}
 <div class="settings-panel" id="settingsPanel">
   <h3>⚙ Settings</h3>
   <label>Server URL</label>
-  <input type="text" id="serverUrl" value="http://192.168.55.43:3001" placeholder="http://&lt;server-ip&gt;:3001">
-  <label>Metrics URL</label>
-  <input type="text" id="metricsUrl" value="http://192.168.55.43:3001/metrics" placeholder="http://&lt;server-ip&gt;:3001/metrics">
-  <label>API Endpoint</label>
-  <input type="text" id="apiEndpoint" value="http://192.168.55.43:3001/v1/chat/completions">
+    <input type="text" id="serverUrl" value="http://192.168.55.43:3001" placeholder="http://<server-ip>:3001">
+    <label>Metrics URL</label>
+    <input type="text" id="metricsUrl" value="http://192.168.55.43:3001/metrics" placeholder="http://<server-ip>:3001/metrics">
+    <label>API Endpoint</label>
+    <input type="text" id="apiEndpoint" value="http://192.168.55.43:3001/v1/chat/completions">
   <label>API Key</label>
   <div class="api-key" id="apiKeyDisplay">••••••••</div>
   <label>Model</label>
@@ -553,7 +604,7 @@ const API_KEY='freellmapi-475bfc0f36bd5559f17fee9a2f92a33d52ab404869205e2f';
 const SETTINGS_KEY='jarvis_settings';
 
 function getBaseUrl(){
-  const u=document.getElementById('serverUrl').value.replace(/\/+$/,'');
+  const u=document.getElementById('serverUrl').value.replace(/\\\/+$/,'');
   return u||'http://192.168.55.43:3001';
 }
 function updateApiEndpointFromServer(){
@@ -648,19 +699,25 @@ for(let i=0;i<50;i++){
 function drawHud(){
   hudCtx.clearRect(0, 0, hudCanvas.width, hudCanvas.height);
   
-  // Activity affects speed and color
+  // Activity affects speed, color and arc appearance
   const speedMul = 1 + hudActivityLevel * 2.5;
-  const baseAlpha = 0.08 + hudActivityLevel * 0.12;
+  const baseAlpha = 0.12 + hudActivityLevel * 0.18;
+  const arcWidth = 1 + hudActivityLevel * 2.5;
   // Color shifts: cyan (idle) → amber (thinking/speaking)
   const h = hudActivityLevel > 0.5 ? 45 : 182; // 182=cyan, 45=amber
   const s = hudActivityLevel > 0.5 ? 85 : 75;
   hudCtx.strokeStyle = `hsla(${h}, ${s}%, 55%, ${baseAlpha})`;
-  hudCtx.lineWidth = 1;
+  hudCtx.lineWidth = arcWidth * 0.6;
   
   for(let i=0;i<3;i++){
     hudCtx.beginPath();
     hudCtx.arc(hudCanvas.width/2, hudCanvas.height/2, 100 + i*80, hudAngle + i*0.5, hudAngle + i*0.5 + Math.PI*1.5);
     hudCtx.stroke();
+    // Fill activity glow behind arcs
+    if (hudActivityLevel > 0.3) {
+      hudCtx.fillStyle = `hsla(${h}, ${s}%, 55%, ${baseAlpha * 0.15})`;
+      hudCtx.fill();
+    }
   }
   
   // Draw particles
@@ -723,7 +780,7 @@ function toggleMetrics(){
 
 async function fetchMetrics(){
   try{
-    const res = await fetch('http://127.0.0.1:8642/metrics');
+    const baseUrl = getBaseUrl(); const res = await fetch(baseUrl+'/metrics');
     if(res.ok){
       const data = await res.json();
       updateMetricsDisplay(data);
@@ -867,6 +924,29 @@ function animateViz(level){
 
 function scrollChat(){requestAnimationFrame(()=>{chat.scrollTop=chat.scrollHeight})}
 
+// ── Inline Markdown Parser (no external deps) ──
+function parseMarkdown(text){
+  if(!text)return '';
+  let h=text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h=h.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,l,c)=>'<pre><code>'+(c.trim())+'</code></pre>');
+  h=h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  h=h.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  h=h.replace(/~~(.+?)~~/g,'<del>$1</del>');
+  h=h.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2">$1</a>');
+  h=h.replace(/^&gt;\s?(.*)$/gm,'<blockquote>$1</blockquote>');
+  h=h.replace(/^---$/gm,'<hr>');
+  h=h.replace(/^[\s]*[-*] (.+)$/gm,'<li>$1</li>');
+  h=h.replace(/^[\s]*\d+\. (.+)$/gm,'<li>$1</li>');
+  h=h.replace(/\n/g,'<br>');
+  return h;
+}
+
 // ── Messages ──
 function addMsg(role,text){
   const div=document.createElement('div');
@@ -877,7 +957,7 @@ function addMsg(role,text){
   const bubble=document.createElement('div');
   bubble.className='bubble';
   if(role==='user')bubble.textContent=text;
-  else bubble.innerHTML=marked.parse(text);
+  else bubble.innerHTML=parseMarkdown(text);
   div.appendChild(label);
   div.appendChild(bubble);
   chat.appendChild(div);
@@ -905,37 +985,47 @@ function hideThinking(){if(thinkingEl){thinkingEl.remove();thinkingEl=null}}
 
 // ── API Call (Streaming) ──
 async function callHermes(msgs, onChunk){
-  const endpoint=document.getElementById('apiEndpoint').value;
+  const baseUrl = `${window.location.protocol}//${window.location.hostname}:8642`;
+  const endpoints=[document.getElementById('apiEndpoint').value, baseUrl+'/v1/chat/completions'];
   const model=document.getElementById('modelSelect').value;
-  const res=await fetch(endpoint,{
-    method:'POST',
-    mode:'cors',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
-    body:JSON.stringify({model,messages:msgs,max_tokens:4096,temperature:.7,stream:true})
-  });
-  updateConnectionStatus(true);
-  if(!res.ok){const t=await res.text();throw new Error(`API ${res.status}: ${t.slice(0,200)}`)}
-  const reader=res.body.getReader();
-  const dec=new TextDecoder();
-  let full='', buf='';
-  while(true){
-    const{done,value}=await reader.read();
-    if(done)break;
-    buf+=dec.decode(value,{stream:true});
-    const lines=buf.split('\n');
-    buf=lines.pop()||'';
-    for(const line of lines){
-      if(!line.startsWith('data: '))continue;
-      const data=line.slice(6);
-      if(data==='[DONE]')continue;
-      try{
-        const j=JSON.parse(data);
-        const d=j.choices?.[0]?.delta?.content||'';
-        if(d){full+=d;onChunk(d,full)}
-      }catch(e){/* skip */}
+  let lastErr;
+  for(const endpoint of endpoints){
+    try{
+      const res=await fetch(endpoint,{
+        method:'POST',
+        mode:'cors',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
+        body:JSON.stringify({model,messages:msgs,max_tokens:4096,temperature:.7,stream:true})
+      });
+      updateConnectionStatus(true);
+      if(!res.ok){const t=await res.text();throw new Error(`API ${res.status}: ${t.slice(0,200)}`)}
+      const reader=res.body.getReader();
+      const dec=new TextDecoder();
+      let full='', buf='';
+      while(true){
+        const{done,value}=await reader.read();
+        if(done)break;
+        buf+=dec.decode(value,{stream:true});
+        const lines=buf.split('\n');
+        buf=lines.pop()||'';
+        for(const line of lines){
+          if(!line.startsWith('data: '))continue;
+          const data=line.slice(6);
+          if(data==='[DONE]')continue;
+          try{
+            const j=JSON.parse(data);
+            const d=j.choices?.[0]?.delta?.content||'';
+            if(d){full+=d;onChunk(d,full)}
+          }catch(e){/* skip */}
+        }
+      }
+      return full;
+    }catch(e){
+      lastErr=e;
+      if(endpoint===endpoints[0])updateConnectionStatus(false);
     }
   }
-  return full;
+  throw lastErr||new Error('No endpoints reachable');
 }
 
 // ── TTS ──
@@ -1042,7 +1132,7 @@ async function send(){
     fullReply=await callHermes(messages,(delta,full)=>{
       hideThinking();
       sb=document.getElementById(streamId);
-      if(sb)sb.querySelector('.bubble').innerHTML=marked.parse(full);
+      if(sb)sb.querySelector('.bubble').innerHTML=parseMarkdown(full);
       scrollChat();
     });
     sb=document.getElementById(streamId);
@@ -1238,7 +1328,7 @@ let statsInterval=null;
 async function fetchStats(){
   const start=performance.now();
   try{
-    const res=await fetch('http://127.0.0.1:8642/health');
+    const baseUrl=getBaseUrl(); const res=await fetch(baseUrl+'/health');
     const lat=Math.round(performance.now()-start);
     const data=await res.json();
     return{version:data.version||'?',latency:lat+'ms',cores:navigator.hardwareConcurrency||'?',
