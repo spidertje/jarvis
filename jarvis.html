@@ -699,7 +699,7 @@ function updateSystemName(){
 
 function applyTheme(theme){
   document.body.className=document.body.className.replace(/\btheme-\w+/g,'');
-  if(theme&&theme!=='cyan')document.body.classList.add('theme-'+theme);
+  if(theme)document.body.classList.add('theme-'+theme);
   try{
     const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
     s.theme=theme;
