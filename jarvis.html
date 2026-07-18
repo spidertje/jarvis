@@ -219,8 +219,10 @@ body.active .arc-reactor::after{animation:pulse-reactor 0.8s ease-in-out infinit
 .arc-reactor.flash{animation:reactor-flash 0.15s ease-out}
 @keyframes reactor-flash{0%{box-shadow:0 0 20px rgba(var(--primary),.3),inset 0 0 15px rgba(var(--primary),.1)}50%{box-shadow:0 0 40px rgba(var(--primary-light),.6),inset 0 0 25px rgba(var(--primary-light),.4)}100%{box-shadow:0 0 20px rgba(var(--primary),.3),inset 0 0 15px rgba(var(--primary),.1)}}
 .top-bar .title{font-size:18px;font-weight:600;letter-spacing:2px;
-  background:linear-gradient(135deg,var(--primary-light),var(--primary-btn));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.top-bar .subtitle{font-size:11px;color:var(--accent-text);letter-spacing:3px;text-transform:uppercase}
+  background:linear-gradient(135deg,var(--primary-light),var(--primary-btn));-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+text-shadow:0 0 10px rgba(var(--primary-light),.3);
+}
+.top-bar .subtitle{font-size:11px;color:rgba(103,232,249,.85);letter-spacing:3px;text-transform:uppercase}
 .top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
 .top-actions button{background:rgba(30,41,59,.5);border:1px solid rgba(var(--primary),.2);color:var(--primary-text);width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .3s}
 .top-actions button:hover{border-color:var(--primary-btn)}
