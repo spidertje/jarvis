@@ -501,8 +501,8 @@ body.fullscreen .side-panel{display:none}
 <div class="top-bar">
   <div class="arc-reactor"></div>
   <div>
-    <div class="title">J.A.R.V.I.S.</div>
-    <div class="subtitle">Just A Rather Very Intelligent System</div>
+    <div class="title" id="systemTitle">J.A.R.V.I.S.</div>
+    <div class="subtitle" id="systemSubtitle">Just A Rather Very Intelligent System</div>
   </div>
   <div class="top-actions">
     <button id="sidePanelToggle" title="Quick Actions" style="margin-right:8px">⚡</button>
@@ -551,6 +551,14 @@ body.fullscreen .side-panel{display:none}
   <div class="toggle-row">
     <label>Fullscreen on start</label>
     <div class="toggle" id="autoFs">OFF</div>
+  </div>
+  <label style="margin-top:24px">System Name</label>
+  <input type="text" id="sysFullName" placeholder="Just A Rather Very Intelligent System">
+  <label>Abbreviation</label>
+  <input type="text" id="sysAbbrev" placeholder="JARVIS">
+  <div style="color:#5b8ba0;font-size:11px;line-height:1.8;margin-top:4px">
+    Type the full name. The abbreviation is auto-generated from the first letter of each word.<br>
+    Edit the abbreviation field if you want a different acronym.
   </div>
   <label style="margin-top:24px">Shortcuts</label>
   <div style="color:#5b8ba0;font-size:11px;line-height:1.8;margin-top:4px">
@@ -632,6 +640,9 @@ function loadSettings(){
       document.getElementById('alwaysListen').classList.toggle('on',alwaysListening);
       document.getElementById('autoFs').textContent=autoFs?'ON':'OFF';
       document.getElementById('autoFs').classList.toggle('on',autoFs);
+      document.getElementById('sysFullName').value=s.sysFullName||'';
+      document.getElementById('sysAbbrev').value=s.sysAbbrev||'';
+      updateSystemName();
     }
   }catch(e){}
 }
@@ -643,9 +654,36 @@ function saveSettings(){
     model:document.getElementById('modelSelect').value,
     ttsRate:parseFloat(document.getElementById('ttsRate').value),
     ttsPitch:parseFloat(document.getElementById('ttsPitch').value),
-    ttsEnabled,alwaysListening,autoFs
+    ttsEnabled,alwaysListening,autoFs,
+    sysFullName:document.getElementById('sysFullName').value,
+    sysAbbrev:document.getElementById('sysAbbrev').value
   }));
 }
+
+function generateAcronym(name){
+  if(!name)return '';
+  return name.split(/\s+/).map(w=>w[0]||'').join('').toUpperCase();
+}
+
+function updateSystemName(){
+  const fullName=document.getElementById('sysFullName').value.trim();
+  const abbrev=document.getElementById('sysAbbrev').value.trim();
+  if(fullName){
+    const acronym=abbrev||generateAcronym(fullName);
+    const spaced=acronym.split('').join('.');
+    document.getElementById('systemTitle').textContent=spaced+'.';
+    document.getElementById('systemSubtitle').textContent=fullName;
+  }
+}
+
+document.getElementById('sysFullName').addEventListener('input',()=>{
+  updateSystemName();
+  saveSettings();
+});
+document.getElementById('sysAbbrev').addEventListener('input',()=>{
+  updateSystemName();
+  saveSettings();
+});
 
 // ── DOM ──
 const chat=document.getElementById('chatArea');
