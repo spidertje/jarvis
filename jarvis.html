@@ -848,15 +848,14 @@ function setStatus(s){
   waveRing.classList.toggle('active',s===STATE.LISTENING);
   viz.classList.toggle('active',s===STATE.LISTENING);
   if(s!==STATE.LISTENING)animateViz(0);
-  // Background circles react to activity
-  const isThinking = s===STATE.THINKING;
+  // Background circles react to activity (only speaking, not thinking)
   const isSpeaking = s===STATE.SPEAKING;
+  const isThinking = s===STATE.THINKING;
   const rings = document.querySelectorAll('.hud-ring');
-  rings.forEach(r => r.classList.toggle('active', isThinking||isSpeaking));
-  document.body.classList.toggle('active', isThinking||isSpeaking);
-  // Canvas particle speed: idle=1, thinking=3, speaking=5
-  if(isThinking) hudActivityLevel = Math.max(hudActivityLevel, 1);
-  else if(isSpeaking) hudActivityLevel = Math.max(hudActivityLevel, 2);
+  rings.forEach(r => r.classList.toggle('active', isSpeaking));
+  document.body.classList.toggle('active', isSpeaking);
+  // Canvas particle speed: idle=1, speaking=5
+  if(isSpeaking) hudActivityLevel = 2;
   else hudActivityLevel = Math.max(0, hudActivityLevel - 0.02);
 }
 
