@@ -192,7 +192,8 @@ body::after{
 .arc-reactor::before{content:'';position:absolute;inset:4px;border-radius:50%;border:1.5px solid rgba(var(--primary),.5);box-shadow:inset 0 0 8px rgba(var(--primary),.2)}
 .arc-reactor::after{content:'';position:absolute;inset:8px;border-radius:50%;
   background:radial-gradient(circle,rgba(var(--primary-light),.8) 0%,rgba(var(--primary),.3) 40%,transparent 70%);
-  animation:pulse-reactor 2s ease-in-out infinite}
+  animation:pulse-reactor 2s ease-in-out infinite;
+  filter:drop-shadow(0 0 10px rgba(var(--primary-light),.6))}
 @keyframes pulse-reactor{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.15);opacity:1}}
 body.active .arc-reactor::after{animation:pulse-reactor 0.8s ease-in-out infinite}
 .arc-reactor.flash{animation:reactor-flash 0.15s ease-out}
@@ -358,7 +359,12 @@ body.active .arc-reactor::after{animation:pulse-reactor 0.8s ease-in-out infinit
 .center-ring{
   position:fixed;top:50%;left:50%;translate:-50% -50%;
   width:80vmin;height:80vmin;border-radius:50%;
-  background:radial-gradient(circle at 50% 50%,rgba(var(--primary),.01) 0%,rgba(var(--primary),.005) 30%,transparent 60%);
+  background:radial-gradient(circle at 50% 50%,
+    rgba(var(--primary-light),.08) 0%,
+    rgba(var(--primary),.04) 20%,
+    rgba(var(--primary),.02) 40%,
+    transparent 65%
+  );
   pointer-events:none;z-index:0;transition:opacity .5s;
 }
 .center-ring.active{background:radial-gradient(circle at 50% 50%,rgba(var(--primary),.04) 0%,rgba(var(--primary),.015) 25%,transparent 55%)}
