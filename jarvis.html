@@ -380,11 +380,359 @@ body.active .arc-reactor::after{animation:pulse-reactor 0.8s ease-in-out infinit
 }
 .settings-panel select:focus,.settings-panel input:focus{border-color:rgba(var(--primary-rgb),.4)}
 .settings-panel .toggle-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
-.settings-panel .toggle-row lab
+.settings-panel .toggle-row label{margin:0}
+.settings-panel .toggle{padding:6px 14px;border-radius:6px;background:rgba(30,41,59,.5);border:1px solid rgba(var(--primary-rgb),.15);color:#67e8f9;cursor:pointer;font-size:12px;transition:all .3s}
+.settings-panel .toggle.on{background:rgba(var(--primary-rgb),.15);border-color:#06b6d4}
+.settings-panel .api-key{background:rgba(30,41,59,.3);border:1px solid rgba(var(--primary-rgb),.1);color:#5b8ba0;padding:8px 12px;border-radius:8px;font-size:11px;word-break:break-all;margin-top:4px;font-family:monospace}
+.settings-overlay{position:fixed;inset:0;z-index:99;background:transparent;display:none}
+.settings-overlay.show{display:block}
 
-... [OUTPUT TRUNCATED - 12685 chars omitted out of 62685 total] ...
+/* Stats Panel */
+.stats-panel{
+  position:fixed;top:0;left:-340px;width:320px;height:100%;z-index:100;
+  background:rgba(3,7,18,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-right:1px solid rgba(var(--primary-rgb),.15);padding:24px;transition:left .35s ease;overflow-y:auto;
+}
+.stats-panel.open{left:0}
+.stats-panel h3{font-size:14px;color:#67e8f9;margin-bottom:16px;letter-spacing:2px;text-transform:uppercase}
+.stat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(var(--primary-rgb),.06)}
+.stat-label{color:#94a3b8;font-size:12px}
+.stat-value{color:#e0f2fe;font-size:13px;font-family:monospace}
+.stat-value.good{color:#4ade80}
+.stat-value.warn{color:#facc15}
+.stat-value.bad{color:#f87171}
+.stat-sectitle{color:#5b8ba0;font-size:11px;letter-spacing:1px;text-transform:uppercase;margin-top:16px;margin-bottom:8px}
 
-sOverlay');
+/* Fullscreen */
+body.fullscreen .top-bar{display:none}
+body.fullscreen .input-area{display:none}
+body.fullscreen .side-panel{display:none}
+.fs-toggle{display:none;position:fixed;top:16px;right:16px;z-index:1000;background:rgba(30,41,59,.6);backdrop-filter:blur(10px);border:1px solid rgba(var(--primary-rgb),.2);color:#67e8f9;width:40px;height:40px;border-radius:50%;cursor:pointer;align-items:center;justify-content:center;font-size:18px;transition:all .3s}
+.fs-toggle:hover{border-color:#06b6d4}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(30,41,59,.9);color:#e0f2fe;padding:10px 18px;border-radius:8px;font-size:13px;z-index:1000;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<!-- HUD Background -->
+<canvas id="hudCanvas" class="hud-canvas"></canvas>
+<div class="hud-ring"></div>
+<div class="hud-ring"></div>
+<div class="hud-ring"></div>
+<div class="hud-data">SYS:0x4A2F</div>
+<div class="hud-data">NET:ACTIVE</div>
+<div class="hud-data">MEM:OK</div>
+<div class="hud-data">UPLINK:STABLE</div>
+
+<!-- Side Panel -->
+<div class="side-panel" id="sidePanel">
+  <div class="side-panel-header">
+    <div class="side-panel-title">Quick Actions</div>
+    <button class="side-panel-close" id="sidePanelClose">✕</button>
+  </div>
+  <div class="side-panel-content">
+    <div class="panel-section">
+      <div class="panel-section-title">Tools</div>
+      <div class="quick-actions">
+        <button class="quick-action-btn" onclick="quickAction('web')">
+          <span class="icon">🌐</span>
+          <span class="label">Web Search</span>
+        </button>
+        <button class="quick-action-btn" onclick="quickAction('weather')">
+          <span class="icon">🌤️</span>
+          <span class="label">Weather</span>
+        </button>
+        <button class="quick-action-btn" onclick="quickAction('code')">
+          <span class="icon">💻</span>
+          <span class="label">Code</span>
+        </button>
+        <button class="quick-action-btn" onclick="quickAction('files')">
+          <span class="icon">📁</span>
+          <span class="label">Files</span>
+        </button>
+      </div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-title">Recent Files</div>
+      <div id="recentFiles">
+        <div class="recent-file">
+          <span class="recent-file-icon">📄</span>
+          <div class="recent-file-info">
+            <div class="recent-file-name">example.txt</div>
+            <div class="recent-file-date">2 hours ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Metrics Dashboard -->
+<div class="metrics-dashboard" id="metricsDashboard">
+  <div class="metrics-title">System Metrics</div>
+  <div class="metric-item">
+    <div>
+      <div class="metric-label">🔵 CPU</div>
+      <div class="metric-bar"><div class="metric-bar-fill cpu" id="cpuBar" style="width:0%"></div></div>
+    </div>
+    <div class="metric-value" id="cpuValue">0%</div>
+  </div>
+  <div class="metric-item">
+    <div>
+      <div class="metric-label">🟣 Memory</div>
+      <div class="metric-bar"><div class="metric-bar-fill memory" id="memBar" style="width:0%"></div></div>
+    </div>
+    <div class="metric-value" id="memValue">0%</div>
+  </div>
+  <div class="metric-item">
+    <div>
+      <div class="metric-label">🟢 Network</div>
+      <div class="metric-bar"><div class="metric-bar-fill network" id="netBar" style="width:0%"></div></div>
+    </div>
+    <div class="metric-value" id="netValue">0 MB/s</div>
+  </div>
+</div>
+
+<!-- Center Ring -->
+<div class="center-ring" id="centerRing"></div>
+<div class="ring-pulse" style="animation-delay:0s"></div>
+<div class="ring-pulse" style="animation-delay:1.5s"></div>
+<div class="smoke-layer" id="smokeLayer"></div>
+<div class="wave-ring" id="waveRing"><div class="ring"></div><div class="ring"></div><div class="ring"></div></div>
+<div class="viz-container" id="vizContainer"></div>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="arc-reactor"></div>
+  <div>
+    <div class="title" id="systemTitle">J.A.R.V.I.S.</div>
+    <div class="subtitle" id="systemSubtitle">Just A Rather Very Intelligent System</div>
+  </div>
+  <div class="top-actions">
+    <button id="sidePanelToggle" title="Quick Actions" style="margin-right:8px">⚡</button>
+    <span class="status-badge" id="statusBadge">standby</span>
+    <span id="connectionDot" class="connection-dot off"></span>
+    <button id="fsBtn" title="Fullscreen">⛶</button>
+    <button id="statsBtn" title="System Status">📊</button>
+    <button id="settingsBtn" title="Settings">⚙</button>
+  </div>
+</div>
+<button class="fs-toggle" id="fsExitBtn">⛶</button>
+
+<!-- Settings Overlay -->
+<div class="settings-overlay" id="settingsOverlay"></div>
+
+<!-- Settings Panel -->
+<div class="settings-panel" id="settingsPanel">
+  <h3>⚙ Settings</h3>
+  <label>Server URL</label>
+    <input type="text" id="serverUrl" value="http://192.168.55.43:3001" placeholder="http://<server-ip>:3001">
+    <label>Metrics URL</label>
+    <input type="text" id="metricsUrl" value="http://192.168.55.43:3001/metrics" placeholder="http://<server-ip>:3001/metrics">
+    <label>API Endpoint</label>
+    <input type="text" id="apiEndpoint" value="http://192.168.55.43:3001/v1/chat/completions">
+  <label>API Key</label>
+  <div class="api-key" id="apiKeyDisplay">••••••••</div>
+  <label>Model</label>
+  <select id="modelSelect">
+    <option value="auto">auto</option>
+    <option value="qwen3-coder-480b">qwen3-coder-480b</option>
+  </select>
+  <label>TTS Voice</label>
+  <select id="voiceSelect"><option value="">Default</option></select>
+  <label>TTS Rate</label>
+  <input type="range" id="ttsRate" min="0.5" max="2" step="0.1" value="1.05">
+  <label>TTS Pitch</label>
+  <input type="range" id="ttsPitch" min="0.5" max="1.5" step="0.1" value="0.9">
+  <div class="toggle-row">
+    <label>Auto-speak replies</label>
+    <div class="toggle on" id="ttsToggle">ON</div>
+  </div>
+  <div class="toggle-row">
+    <label>Always-on listening</label>
+    <div class="toggle" id="alwaysListen">OFF</div>
+  </div>
+  <div class="toggle-row">
+    <label>Fullscreen on start</label>
+    <div class="toggle" id="autoFs">OFF</div>
+  </div>
+  <label style="margin-top:24px">System Name</label>
+  <input type="text" id="sysFullName" placeholder="Just A Rather Very Intelligent System">
+  <label>Abbreviation</label>
+  <input type="text" id="sysAbbrev" placeholder="JARVIS">
+  <div style="color:#5b8ba0;font-size:11px;line-height:1.8;margin-top:4px">
+    Type the full name. The abbreviation is auto-generated from the first letter of each word.<br>
+    Edit the abbreviation field if you want a different acronym.
+  </div>
+  <label style="margin-top:24px">Color Theme</label>
+  <select id="themeSelect">
+    <option value="cyan">Cyan</option>
+    <option value="amber">Amber</option>
+    <option value="emerald">Emerald</option>
+    <option value="violet">Violet</option>
+    <option value="rose">Rose</option>
+  </select>
+  <div style="color:#5b8ba0;font-size:11px;line-height:1.8;margin-top:4px">
+    Changes apply immediately. Saved to localStorage.
+  </div>
+  <label style="margin-top:24px">Shortcuts</label>
+  <div style="color:#5b8ba0;font-size:11px;line-height:1.8;margin-top:4px">
+    <b>Enter</b> — send<br>
+    <b>Shift+Enter</b> — newline<br>
+    <b>Space (listening)</b> — stop mic<br>
+    <b>Esc</b> — close settings
+  </div>
+</div>
+
+<!-- Stats Panel -->
+<div class="stats-panel" id="statsPanel">
+  <h3>📊 System Status</h3>
+  <div id="statsContent">Loading...</div>
+</div>
+
+<!-- Chat Area -->
+<div class="chat-area" id="chatArea"></div>
+<button class="clear-btn" id="clearBtn">Clear Chat</button>
+
+<!-- Input Area -->
+<div class="input-area">
+  <div class="file-drop-zone" id="fileDropZone">Drop file here</div>
+  <div class="input-row">
+    <textarea id="input" rows="1" placeholder="Type a message..." maxlength="4000"></textarea>
+    <button class="btn btn-mic" id="micBtn" title="Voice input">🎤</button>
+    <button class="btn btn-send" id="sendBtn" title="Send">➤</button>
+  </div>
+  <!-- Tool Buttons -->
+  <div class="tool-buttons">
+    <button class="tool-btn" onclick="quickAction('web')"><span class="icon">🌐</span> Web</button>
+    <button class="tool-btn" onclick="quickAction('weather')"><span class="icon">🌤️</span> Weather</button>
+    <button class="tool-btn" onclick="quickAction('code')"><span class="icon">💻</span> Code</button>
+    <button class="tool-btn" onclick="quickAction('files')"><span class="icon">📁</span> Files</button>
+    <button class="tool-btn" onclick="quickAction('search')"><span class="icon">🔍</span> Search</button>
+    <button class="tool-btn" onclick="quickAction('translate')"><span class="icon">🌍</span> Translate</button>
+  </div>
+</div>
+
+<script>
+// ── State ──
+const STATE={IDLE:'standby',LISTENING:'listening',THINKING:'thinking',SPEAKING:'speaking'};
+let state=STATE.IDLE,isRecording=false,synth=window.speechSynthesis,recognition=null;
+let isSpeaking=false,alwaysListening=false,autoFs=false,ttsEnabled=true;
+
+let messages=[{role:"system",content:"You are J.A.R.V.I.S., Tony Stark's AI assistant. Respond with calm, British-tinged professionalism. Be helpful, witty when appropriate, but always precise. Keep responses concise and conversational."}];
+let hudActivityLevel=0; // 0=idle, 1=thinking, 2=speaking
+
+// Settings
+const API_KEY='freellmapi-475bfc0f36bd5559f17fee9a2f92a33d52ab404869205e2f';
+const SETTINGS_KEY='jarvis_settings';
+
+function getBaseUrl(){
+  const u=document.getElementById('serverUrl').value.replace(/\\\/+$/,'');
+  return u||'http://192.168.55.43:3001';
+}
+function updateApiEndpointFromServer(){
+  const base=getBaseUrl();
+  document.getElementById('apiEndpoint').value=base+'/v1/chat/completions';
+}
+document.getElementById('serverUrl').addEventListener('input',updateApiEndpointFromServer);
+
+function loadSettings(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SETTINGS_KEY));
+    if(s){
+      document.getElementById('serverUrl').value=s.serverUrl||'http://192.168.55.43:3001';
+      document.getElementById('metricsUrl').value=s.metricsUrl||'http://192.168.55.43:3001/metrics';
+      updateApiEndpointFromServer();
+      document.getElementById('modelSelect').value=s.model||'auto';
+      document.getElementById('ttsRate').value=s.ttsRate||1.05;
+      document.getElementById('ttsPitch').value=s.ttsPitch||0.9;
+      ttsEnabled=s.ttsEnabled!==false;
+      alwaysListening=!!s.alwaysListen;
+      autoFs=!!s.autoFs;
+      document.getElementById('ttsToggle').textContent=ttsEnabled?'ON':'OFF';
+      document.getElementById('ttsToggle').classList.toggle('on',ttsEnabled);
+      document.getElementById('alwaysListen').textContent=alwaysListening?'ON':'OFF';
+      document.getElementById('alwaysListen').classList.toggle('on',alwaysListening);
+      document.getElementById('autoFs').textContent=autoFs?'ON':'OFF';
+      document.getElementById('autoFs').classList.toggle('on',autoFs);
+      const theme=s.theme||'cyan';
+      document.getElementById('themeSelect').value=theme;
+      applyTheme(theme);
+      document.getElementById('sysFullName').value=s.sysFullName||'';
+      document.getElementById('sysAbbrev').value=s.sysAbbrev||'';
+      updateSystemName();
+    }
+  }catch(e){}
+}
+function saveSettings(){
+  localStorage.setItem(SETTINGS_KEY,JSON.stringify({
+    serverUrl:document.getElementById('serverUrl').value,
+    metricsUrl:document.getElementById('metricsUrl').value,
+    endpoint:document.getElementById('apiEndpoint').value,
+    model:document.getElementById('modelSelect').value,
+    ttsRate:parseFloat(document.getElementById('ttsRate').value),
+    ttsPitch:parseFloat(document.getElementById('ttsPitch').value),
+    ttsEnabled,alwaysListening,autoFs,
+    sysFullName:document.getElementById('sysFullName').value,
+    sysAbbrev:document.getElementById('sysAbbrev').value,
+    theme:document.getElementById('themeSelect').value
+  }));
+}
+
+function generateAcronym(name){
+  if(!name)return '';
+  return name.split(/\s+/).map(w=>w[0]||'').join('').toUpperCase();
+}
+
+function updateSystemName(){
+  const fullName=document.getElementById('sysFullName').value.trim();
+  const abbrev=document.getElementById('sysAbbrev').value.trim();
+  if(fullName){
+    const acronym=abbrev||generateAcronym(fullName);
+    const spaced=acronym.split('').join('.');
+    document.getElementById('systemTitle').textContent=spaced+'.';
+    document.getElementById('systemSubtitle').textContent=fullName;
+  }
+}
+
+function applyTheme(theme){
+  document.body.className=document.body.className.replace(/\btheme-\w+/g,'');
+  if(theme&&theme!=='cyan')document.body.classList.add('theme-'+theme);
+  try{
+    const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');
+    s.theme=theme;
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(s));
+  }catch(e){}
+}
+
+document.getElementById('sysFullName').addEventListener('input',()=>{
+  updateSystemName();
+  saveSettings();
+});
+document.getElementById('sysAbbrev').addEventListener('input',()=>{
+  updateSystemName();
+  saveSettings();
+});
+document.getElementById('themeSelect').addEventListener('change',()=>{
+  applyTheme(document.getElementById('themeSelect').value);
+  saveSettings();
+});
+
+// ── DOM ──
+const chat=document.getElementById('chatArea');
+const input=document.getElementById('input');
+const sendBtn=document.getElementById('sendBtn');
+const micBtn=document.getElementById('micBtn');
+const statusEl=document.getElementById('statusBadge');
+const centerRing=document.getElementById('centerRing');
+const waveRing=document.getElementById('waveRing');
+const viz=document.getElementById('vizContainer');
+const statsPanel=document.getElementById('statsPanel');
+const statsBtn=document.getElementById('statsBtn');
+const settingsPanel=document.getElementById('settingsPanel');
+const settingsOverlay=document.getElementById('settingsOverlay');
 const settingsBtn=document.getElementById('settingsBtn');
 const fsBtn=document.getElementById('fsBtn');
 const fsExitBtn=document.getElementById('fsExitBtn');
