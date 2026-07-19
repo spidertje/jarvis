@@ -309,7 +309,7 @@ text-shadow:0 0 10px rgba(var(--primary-light),.3);
 
 /* Thinking Indicator */
 .thinking-dots{display:flex;gap:6px;padding:8px 0}
-.thinking-dots span{width:8px;height:8px;border-radius:50%;background:var(--primary-light);animation:bounce 1.4s ease-in-out infinite}
+.thinking-dots span{width:8px;height:8px;border-radius:50%;background:rgb(var(--primary-light));animation:bounce 1.4s ease-in-out infinite}
 .thinking-dots span:nth-child(2){animation-delay:.16s}
 .thinking-dots span:nth-child(3){animation-delay:.32s}
 @keyframes bounce{0%,80%,100%{transform:scale(.6);opacity:.3}40%{transform:scale(1);opacity:1}}
@@ -629,11 +629,11 @@ body.fullscreen .side-panel{display:none}
 <div class="settings-panel" id="settingsPanel">
   <h3>⚙ Settings</h3>
   <label>Server URL</label>
-    <input type="text" id="serverUrl" value="http://192.168.55.43:3001" placeholder="http://<server-ip>:3001">
+    <input type="text" id="serverUrl" value="http://192.168.55.179:8642" placeholder="http://<server-ip>:3001">
     <label>Metrics URL</label>
-    <input type="text" id="metricsUrl" value="http://192.168.55.43:3001/metrics" placeholder="http://<server-ip>:3001/metrics">
+    <input type="text" id="metricsUrl" value="http://192.168.55.179:8642/metrics" placeholder="http://<server-ip>:3001/metrics">
     <label>API Endpoint</label>
-    <input type="text" id="apiEndpoint" value="http://192.168.55.43:3001/v1/chat/completions">
+    <input type="text" id="apiEndpoint" value="http://192.168.55.179:8642/v1/chat/completions">
   <label>API Key</label>
   <div class="api-key" id="apiKeyDisplay">••••••••</div>
   <label>Model</label>
@@ -659,6 +659,8 @@ body.fullscreen .side-panel{display:none}
     <label>Fullscreen on start</label>
     <div class="toggle" id="autoFs">OFF</div>
   </div>
+  <label>TTS Relay (for Linux/headless)</label>
+  <input type="text" id="ttsRelayUrl" placeholder="http://<linux-ip>:5001">
   <label style="margin-top:24px">System Name</label>
   <input type="text" id="sysFullName" placeholder="Just A Rather Very Intelligent System">
   <label>Abbreviation</label>
@@ -721,17 +723,27 @@ body.fullscreen .side-panel{display:none}
 const STATE={IDLE:'standby',LISTENING:'listening',THINKING:'thinking',SPEAKING:'speaking'};
 let state=STATE.IDLE,isRecording=false,synth=window.speechSynthesis,recognition=null;
 let isSpeaking=false,alwaysListening=false,autoFs=false,ttsEnabled=true;
+let voicesReady=false,voiceRetries=0;
+if(synth&&synth.onvoiceschanged!==undefined){
+  synth.addEventListener('voiceschanged',()=>{voicesReady=synth.getVoices().length>0},{once:true});
+  setTimeout(()=>{if(synth.getVoices().length>0)voicesReady=true},2000);
+}else{voicesReady=true}
 
-let messages=[{role:"system",content:"You are J.A.R.V.I.S., Tony Stark's AI assistant. Respond with calm, British-tinged professionalism. Be helpful, witty when appropriate, but always precise. Keep responses concise and conversational."}];
-let hudActivityLevel=0; // 0=idle, 1=thinking, 2=speaking
+function buildSystemPrompt(){
+  const fn=document.getElementById('sysFullName').value.trim()||'Just A Rather Very Intelligent System';
+  const ab=document.getElementById('sysAbbrev').value.trim()||'J.A.R.V.I.S.';
+  return 'You are '+ab+', '+fn+'. Respond with calm, British-tinged professionalism. Be helpful, witty when appropriate, but always precise. Keep responses concise and conversational.';
+}
+let messages=[{role:'system',content:buildSystemPrompt()}];
+let hudActivityLevel=0;
 
 // Settings
-const API_KEY='freellmapi-475bfc0f36bd5559f17fee9a2f92a33d52ab404869205e2f';
+const API_KEY='freellmapi-0d9e3106805c5ef86625a1a4256b96ca20e494f775ace34f';
 const SETTINGS_KEY='jarvis_settings';
 
 function getBaseUrl(){
   const u=document.getElementById('serverUrl').value.replace(/\\\/+$/,'');
-  return u||'http://192.168.55.43:3001';
+  return u||'http://192.168.55.179:8642';
 }
 function updateApiEndpointFromServer(){
   const base=getBaseUrl();
@@ -743,8 +755,11 @@ function loadSettings(){
   try{
     const s=JSON.parse(localStorage.getItem(SETTINGS_KEY));
     if(s){
-      document.getElementById('serverUrl').value=s.serverUrl||'http://192.168.55.43:3001';
-      document.getElementById('metricsUrl').value=s.metricsUrl||'http://192.168.55.43:3001/metrics';
+      // Migrate stale URL from old jarvis version
+      if(s.serverUrl) s.serverUrl = s.serverUrl.replace('192.168.55.43:3001', '192.168.55.179:8642');
+      if(s.metricsUrl) s.metricsUrl = s.metricsUrl.replace('192.168.55.43:3001', '192.168.55.179:8642');
+      document.getElementById('serverUrl').value=s.serverUrl||'http://192.168.55.179:8642';
+      document.getElementById('metricsUrl').value=s.metricsUrl||'http://192.168.55.179:8642/metrics';
       updateApiEndpointFromServer();
       document.getElementById('modelSelect').value=s.model||'auto';
       document.getElementById('ttsRate').value=s.ttsRate||1.05;
@@ -758,6 +773,7 @@ function loadSettings(){
       document.getElementById('alwaysListen').classList.toggle('on',alwaysListening);
       document.getElementById('autoFs').textContent=autoFs?'ON':'OFF';
       document.getElementById('autoFs').classList.toggle('on',autoFs);
+      document.getElementById('ttsRelayUrl').value=s.ttsRelayUrl||'';
       const theme=s.theme||'cyan';
       document.getElementById('themeSelect').value=theme;
       applyTheme(theme);
@@ -776,6 +792,7 @@ function saveSettings(){
     ttsRate:parseFloat(document.getElementById('ttsRate').value),
     ttsPitch:parseFloat(document.getElementById('ttsPitch').value),
     ttsEnabled,alwaysListening,autoFs,
+    ttsRelayUrl:document.getElementById('ttsRelayUrl').value,
     sysFullName:document.getElementById('sysFullName').value,
     sysAbbrev:document.getElementById('sysAbbrev').value,
     theme:document.getElementById('themeSelect').value
@@ -796,6 +813,8 @@ function updateSystemName(){
     document.getElementById('systemTitle').textContent=spaced+'.';
     document.getElementById('systemSubtitle').textContent=fullName;
   }
+  // Rewrite the system prompt so the LLM uses the new name
+  if(messages[0]&&messages[0].role==='system')messages[0].content=buildSystemPrompt();
 }
 
 function applyTheme(theme){
@@ -1102,6 +1121,11 @@ function animateViz(level){
 }
 
 function scrollChat(){requestAnimationFrame(()=>{chat.scrollTop=chat.scrollHeight})}
+function showToast(msg, duration=4000){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);void t.offsetWidth;t.classList.add('show');
+  setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300)},duration);
+}
 
 // ── Inline Markdown Parser (no external deps) ──
 function parseMarkdown(text){
@@ -1164,7 +1188,7 @@ function hideThinking(){if(thinkingEl){thinkingEl.remove();thinkingEl=null}}
 
 // ── API Call (Streaming) ──
 async function callHermes(msgs, onChunk){
-  const baseUrl = `${window.location.protocol}//${window.location.hostname}:8642`;
+  const baseUrl=getBaseUrl();
   const endpoints=[document.getElementById('apiEndpoint').value, baseUrl+'/v1/chat/completions'];
   const model=document.getElementById('modelSelect').value;
   let lastErr;
@@ -1210,6 +1234,14 @@ async function callHermes(msgs, onChunk){
 // ── TTS ──
 function speak(text,cb){
   console.log('speak called with text:', text);
+  const relay=document.getElementById('ttsRelayUrl').value.trim();
+  if(relay){
+    fetch(relay,{method:'POST',body:text,mode:'no-cors'}).catch(()=>{});
+    setStatus(STATE.SPEAKING);
+    const dur=Math.max(800,text.length*50);
+    setTimeout(()=>{setStatus(STATE.IDLE);if(cb)cb()},dur);
+    return;
+  }
   if(!synth){
     console.error('SpeechSynthesis not supported');
     if(cb)cb();
@@ -1225,6 +1257,7 @@ function speak(text,cb){
     if(cb)cb();
     return;
   }
+  // Cancel ANY pending speech first
   synth.cancel();
   const u=new SpeechSynthesisUtterance(text);
   u.rate=parseFloat(document.getElementById('ttsRate').value);
@@ -1241,11 +1274,13 @@ function speak(text,cb){
   }else{
     console.log('No voice selected, using default');
   }
-  if(synth.getVoices().length===0){
-    console.log('Waiting for voices to load...');
-    setTimeout(()=>speak(text,cb),100);
+  if(!voicesReady){
+    voiceRetries++;
+    if(voiceRetries>20){showToast('Speech: no voices available (try changing TTS Voice in settings)');if(cb)cb();return}
+    setTimeout(()=>speak(text,cb),200);
     return;
   }
+  voiceRetries=0;
   let started=false;
   u.onstart=()=>{started=true;isSpeaking=true;setStatus(STATE.SPEAKING);console.log('Speech started');};
   // Pulse visual on each word boundary
@@ -1253,8 +1288,15 @@ function speak(text,cb){
     if(event.name==='word') triggerSpeechPulse();
   };
   u.onend=()=>{isSpeaking=false;setStatus(STATE.IDLE);console.log('Speech ended');if(cb)cb();};
-  u.onerror=(e)=>{isSpeaking=false;setStatus(STATE.IDLE);console.error('Speech synthesis error:', e);if(cb)cb();};
-  synth.speak(u);
+  u.onerror=(e)=>{
+    isSpeaking=false;setStatus(STATE.IDLE);
+    const msg='Speech error: '+(e.error||e.message||JSON.stringify(e));
+    console.error(msg,e);
+    showToast(msg);
+    if(cb)cb();
+  };
+  // Safari: speak() after await gets blocked by autoplay policy
+  setTimeout(() => synth.speak(u), 0);
   setTimeout(()=>{if(!started&&state===STATE.SPEAKING)setStatus(STATE.IDLE);console.log('Speech timeout fallback');},100);
 }
 
@@ -1476,6 +1518,7 @@ document.getElementById('modelSelect').addEventListener('change',saveSettings);
 document.getElementById('ttsRate').addEventListener('change',saveSettings);
 document.getElementById('ttsPitch').addEventListener('change',saveSettings);
 document.getElementById('voiceSelect').addEventListener('change',saveSettings);
+document.getElementById('ttsRelayUrl').addEventListener('change',saveSettings);
 
 // ── Chat Persistence ──
 const CHATS_KEY='jarvis_chats';
@@ -1573,7 +1616,7 @@ function toggleStats(){
 // ── Clear ──
 clearBtn.addEventListener('click',()=>{
   chat.innerHTML='';
-  messages=[{role:'system',content:"You are J.A.R.V.I.S., Tony Stark's AI assistant. Respond with calm, British-tinged professionalism. Be helpful, witty when appropriate, but always precise. Keep responses concise and conversational."}];
+  messages=[{role:'system',content:buildSystemPrompt()}];
   localStorage.removeItem(CHATS_KEY);
   const div=document.createElement('div');
   div.className='msg jarvis';
